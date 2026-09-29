@@ -1,0 +1,10 @@
+{
+  "name": "Remix EAU University Chatbot",
+  "description": "A beautiful, friendly university chatbot for EAU University",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

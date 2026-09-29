@@ -1,0 +1,32 @@
+{
+  "announcements": "Diiwaangelinta sanad-dugsiyeedka cusub 2026/2027 ee Jaamacadda Bariga Afrika (EAU Garowe) waxay si rasmi ah u bilaabanaysaa 01-da Sebtembar 2026. Fasalladuna waxay furmayaan 05-ta Sebtembar 2026. Munaasabadda qalinjabintuna waxay dhacaysaa 15-ka Nofembar 2026.",
+  "customKnowledge": "Kharashka diiwaangelinta ardayga cusub waa $20. Jaamacaddu waxay bixisaa deeqo waxbarasho iyo qiimo-dhimis gaar ah.",
+  "documents": [
+    {
+      "id": "doc-prospectus",
+      "name": "EAU Prospectus & General Guide",
+      "description": "Taariikhda, Kulliyadaha, Xogta Guud & Xiriirka Jaamacadda",
+      "enabled": true,
+      "size": "6 KB",
+      "updatedAt": "2026-09-02"
+    },
+    {
+      "id": "doc-curriculum",
+      "name": "Manhajka & Maadooyinka Kulliyadaha (Curriculums)",
+      "description": "Qorshaha maadooyinka, koorsooyinka, iyo takhasusaadka",
+      "enabled": true,
+      "size": "45 KB",
+      "updatedAt": "2026-09-02"
+    },
+    {
+      "id": "doc-calendar-2026-2027",
+      "name": "Academic Calendar 2026-2027 (Bachelor Degree)",
+      "description": "Jadwalka Sanad-Dugsiyeedka Rasmiga ah ee 2026-2027",
+      "enabled": true,
+      "size": "4 KB",
+      "updatedAt": "2026-09-02"
+    }
+  ],
+  "customDocuments": [],
+  "updatedAt": "2026-09-19T09:58:00.000Z"
+}

@@ -906,7 +906,7 @@ export default function App() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className={`flex flex-col h-screen font-sans relative transition-colors ${
+      className={`flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden font-sans relative transition-colors ${
         theme === 'dark' ? 'bg-[#000000] text-white' : 'bg-[#ffffff] text-slate-950'
       }`}
     >
@@ -934,7 +934,7 @@ export default function App() {
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-2xl flex items-center gap-2 text-xs md:text-sm font-medium border border-slate-700/40"
+            className="fixed top-14 sm:top-16 left-1/2 -translate-x-1/2 z-50 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-2xl flex items-center gap-2 text-xs sm:text-sm font-medium border border-slate-700/40"
           >
             <Check size={16} className="text-green-400 dark:text-green-600" />
             <span>Link copied to clipboard</span>
@@ -946,9 +946,9 @@ export default function App() {
       <main 
         ref={chatContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 md:p-6 w-full max-w-4xl mx-auto"
+        className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-2 sm:py-4 md:py-6 w-full max-w-4xl mx-auto"
       >
-        <div className="space-y-6 pb-6">
+        <div className="space-y-3.5 sm:space-y-6 pb-4 sm:pb-6">
           <AnimatePresence initial={false}>
             {messages.map((message) => (
               <motion.div
@@ -987,7 +987,7 @@ export default function App() {
             <motion.div
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2.5 text-xs md:text-sm text-slate-400 dark:text-slate-500 py-2"
+              className="flex items-center gap-2 text-xs sm:text-sm text-slate-400 dark:text-slate-500 py-1.5 sm:py-2"
             >
               <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
               <span>{loadingStatus || "EAU Assistant is thinking..."}</span>
@@ -1002,14 +1002,14 @@ export default function App() {
       {showScrollButton && (
         <button
           onClick={scrollToBottom}
-          className={`fixed bottom-24 right-6 p-2.5 rounded-full shadow-xl border transition-all z-20 ${
+          className={`fixed bottom-20 sm:bottom-24 right-3.5 sm:right-6 p-2 sm:p-2.5 rounded-full shadow-xl border transition-all z-20 active:scale-95 ${
             theme === 'dark' 
               ? 'bg-[#1e1e1e] border-[#333333] text-white hover:bg-[#2a2a2a]' 
               : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
           }`}
           title="Scroll to bottom"
         >
-          <ArrowDown size={16} />
+          <ArrowDown className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
         </button>
       )}
 

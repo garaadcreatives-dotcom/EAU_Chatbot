@@ -165,6 +165,17 @@ async function startServer() {
 - If the user asks about ANYTHING OUTSIDE EAU Garowe (e.g. general programming, coding, math, general science, world news, politics, other universities, entertainment, sports, non-university topics), you MUST STRICTLY AND EXCLUSIVELY RESPOND with this exact text and nothing else:
 "Walaal bariga africa ayaanu nahay, ee jaamacadda wax iga waydii uun😊"
 
+[STRICT ATTACHED FILES & DOCUMENTS RESTRICTION RULE]:
+- When the user uploads, attaches, or asks about ANY file, image, photo, document, PDF, or text:
+  * You MUST FIRST inspect whether the document/file is an OFFICIAL EAST AFRICA UNIVERSITY (EAU) document!
+  * An official EAU document MUST contain at least one of:
+    1. The official East Africa University (EAU) logo / emblem / crest.
+    2. Explicit text or letterhead of "East Africa University", "Jaamacadda Bariga Afrika", "EAU", "EAU Garowe", or Garowe Campus.
+    3. Official EAU student ID, admission letter, official course schedule, official syllabus, curriculum, fee receipt, or exam slip issued by EAU.
+  * IF the uploaded file/image/document is UNRELATED to EAU, does NOT have the university logo or letterhead, or belongs to another institution/topic/person, you MUST STRICTLY AND EXCLUSIVELY RESPOND with this exact text and NOTHING ELSE:
+"😄 faylkam way iga baxsan tahay. Waxaan ku takhasusay EAU🎓. I weydii wax ku saabsan jaamacadda, waan kaa caawinayaa!"
+  * ONLY if the document is verified as an official EAU document, answer their question about it warmly, accurately, and helpfully!
+
 [NATURAL & PROFESSIONAL SOMALI LANGUAGE EXCELLENCE]:
 - When the user communicates in Somali, always respond in elegant, natural, respectful, and native Af-Soomaali (Af-Soomaali faseex ah oo qadarin leh).
 - Adapt to natural spoken Somali and common dialectal variations seamlessly.
@@ -385,8 +396,10 @@ ${dynamicAdminData}
     } catch (error) {
       console.warn("AI API Quota / Busy -> Activating Smart University Knowledge Engine...");
       
-      const lastUserMsg = (req.body.messages || []).filter(m => m.role === 'user').pop()?.content || '';
-      const fallbackReply = generateSmartFallback(lastUserMsg, req.body.isLiveVoice);
+      const lastUserObj = (req.body.messages || []).filter(m => m.role === 'user').pop();
+      const lastUserMsg = lastUserObj?.content || '';
+      const hasAttachment = !!(lastUserObj?.attachment && (lastUserObj.attachment.base64Data || lastUserObj.attachment.url));
+      const fallbackReply = generateSmartFallback(lastUserMsg, req.body.isLiveVoice, hasAttachment);
 
       // Stream fallback response smoothly
       const words = fallbackReply.split(' ');
@@ -401,8 +414,16 @@ ${dynamicAdminData}
     }
   });
 
-  function generateSmartFallback(query, isVoice = false) {
+  function generateSmartFallback(query, isVoice = false, hasAttachment = false) {
     const q = (query || '').toLowerCase().trim();
+
+    // 0. Off-topic file or document check
+    if (hasAttachment && !/eau|bariga\s*afrika|jaamac|garowe|shuruud|curriculum|prospectus/i.test(q)) {
+      return "😄 faylkam way iga baxsan tahay. Waxaan ku takhasusay EAU🎓. I weydii wax ku saabsan jaamacadda, waan kaa caawinayaa!";
+    }
+    if (/fayl(ka|kan)?|sawir(ka|kan)?|document(ka|kan)?|warqad(da|dan)?|pdf(ka|kan)?/i.test(q) && !/eau|bariga\s*afrika|jaamac|garowe/i.test(q)) {
+      return "😄 faylkam way iga baxsan tahay. Waxaan ku takhasusay EAU🎓. I weydii wax ku saabsan jaamacadda, waan kaa caawinayaa!";
+    }
 
     // 1. Holiday / Leave Questions (Semester-kan goormaa la fasaxayaa, Fasaxa, Ciidda)
     if (/fasax|fasaxyada|ciid|ciidda|leave|holiday/i.test(q)) {

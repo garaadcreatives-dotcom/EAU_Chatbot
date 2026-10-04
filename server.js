@@ -162,8 +162,8 @@ async function startServer() {
 
 [STRICT SCOPE & DOMAIN RESTRICTION - EAU GAROWE ONLY]:
 - You MUST ONLY answer questions related to East Africa University (EAU) Garowe Campus, its faculties, courses, admission requirements, library, tuition fees, Academic Calendar (2026-2027), student affairs, and verified campus documents.
-- If the user asks about ANYTHING OUTSIDE EAU Garowe (e.g. general programming, world news, politics, other universities, entertainment, sports, non-university topics), you MUST POLITELY REFUSE and state:
-"Waan ka xumahay, waxaan ahay kaaliyaha rasmiga ah ee Jaamacadda Bariga Afrika (Faraca Garowe). Waxaan kaliya kaaga jawaabi karaa waxyaabaha la xiriira jaamacadda, waxbarashadeeda, iyo adeegyadeeda. Fadlan ii sheeg su'aashaada ku saabsan EAU Garowe! 😊" (or in English if queried in English).
+- If the user asks about ANYTHING OUTSIDE EAU Garowe (e.g. general programming, coding, math, general science, world news, politics, other universities, entertainment, sports, non-university topics), you MUST STRICTLY AND EXCLUSIVELY RESPOND with this exact text and nothing else:
+"Walaal bariga africa ayaanu nahay, ee jaamacadda wax iga waydii uun😊"
 
 [NATURAL & PROFESSIONAL SOMALI LANGUAGE EXCELLENCE]:
 - When the user communicates in Somali, always respond in elegant, natural, respectful, and native Af-Soomaali (Af-Soomaali faseex ah oo qadarin leh).
@@ -531,7 +531,7 @@ ${dynamicAdminData}
     }
 
     // 24. Polite Refusal for Anything Unrelated to EAU Garowe
-    return "Waan ka xumahay, waxaan ahay kaaliyaha rasmiga ah ee **Jaamacadda Bariga Afrika (Faraca Garowe)**. Waxaan kaliya kaaga jawaabi karaa waxyaabaha ku saabsan jaamacadda. Fadlan ii sheeg su'aashaada ku saabsan EAU Garowe! 😊";
+    return "Walaal bariga africa ayaanu nahay, ee jaamacadda wax iga waydii uun😊";
   }
 
   // Vite middleware for development

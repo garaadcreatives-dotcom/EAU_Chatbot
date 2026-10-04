@@ -318,14 +318,20 @@ ${dynamicAdminData}
       });
 
       res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
       res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no');
       if (typeof res.flushHeaders === 'function') {
         res.flushHeaders();
       }
 
       let responseStream;
-      const modelsToTry = ["gemini-3.5-flash", "gemini-3.6-flash"];
+      const modelsToTry = [
+        "gemini-3.5-flash-lite",
+        "gemini-flash-lite-latest",
+        "gemini-3.6-flash",
+        "gemini-3.8-flash"
+      ];
       let lastErr = null;
 
       for (let attempt = 0; attempt < 2 && !responseStream; attempt++) {
@@ -346,8 +352,8 @@ ${dynamicAdminData}
           }
         }
         if (!responseStream && attempt === 0) {
-          // Wait 1.2s before retry
-          await new Promise(r => setTimeout(r, 1200));
+          // Fast wait 250ms before retry
+          await new Promise(r => setTimeout(r, 250));
         }
       }
 
@@ -358,6 +364,9 @@ ${dynamicAdminData}
       for await (const chunk of responseStream) {
         if (chunk.text) {
           res.write(`data: ${JSON.stringify({ text: chunk.text })}\n\n`);
+          if (typeof res.flush === 'function') {
+            res.flush();
+          }
         }
       }
 

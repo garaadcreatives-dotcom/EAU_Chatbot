@@ -639,8 +639,18 @@ export default function App() {
       attachment: currentAttachment || undefined
     };
 
+    let botMessageId = (Date.now() + 1).toString();
     const baseList = overrideHistory !== null && overrideHistory !== undefined ? overrideHistory : messages;
-    const newMessagesList = [...baseList, userMessage];
+    const newMessagesList = [
+      ...baseList, 
+      userMessage,
+      {
+        id: botMessageId,
+        role: 'bot',
+        content: '',
+        isTyping: true
+      }
+    ];
 
     setMessages(newMessagesList);
     setInput('');
@@ -656,11 +666,10 @@ export default function App() {
         if (currentIndex === -1) return statuses[0];
         return statuses[(currentIndex + 1) % statuses.length];
       });
-    }, 2000);
+    }, 1500);
 
-    let botMessageId = '';
     try {
-      const chatHistory = newMessagesList.map(m => ({
+      const chatHistory = [...baseList, userMessage].map(m => ({
         role: m.role,
         content: m.content,
         attachment: m.attachment
@@ -681,14 +690,6 @@ export default function App() {
       const decoder = new TextDecoder();
       
       let botResponse = '';
-      botMessageId = (Date.now() + 1).toString();
-      
-      setMessages(prev => [...prev, {
-        id: botMessageId,
-        role: 'bot',
-        content: '',
-        isTyping: true
-      }]);
 
       if (reader) {
         let isFirstChunk = true;
@@ -946,9 +947,9 @@ export default function App() {
       <main 
         ref={chatContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-2 sm:py-4 md:py-6 w-full max-w-4xl mx-auto"
+        className="flex-1 overflow-y-auto px-3.5 sm:px-6 md:px-8 py-3 sm:py-5 md:py-7 w-full max-w-4xl lg:max-w-5xl mx-auto"
       >
-        <div className="space-y-3.5 sm:space-y-6 pb-4 sm:pb-6">
+        <div className="space-y-4 sm:space-y-7 pb-4 sm:pb-8">
           <AnimatePresence initial={false}>
             {messages.map((message) => (
               <motion.div

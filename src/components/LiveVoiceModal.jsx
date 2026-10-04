@@ -5,12 +5,10 @@ import {
   MicOff, 
   X, 
   VolumeX, 
-  Sparkles
+  Sparkles,
+  Globe
 } from 'lucide-react';
 
-/**
- * Fast Language Detector (Somali vs English)
- */
 /**
  * Fast Language Detector (Somali vs English)
  */
@@ -61,7 +59,9 @@ export default function LiveVoiceModal({
   isOpen,
   onClose,
   theme,
-  onSendMessageVoice
+  onSendMessageVoice,
+  currentLanguage = 'so-SO',
+  setCurrentLanguage
 }) {
   // Voice states: 'listening' | 'speaking' | 'muted'
   const [voiceState, setVoiceState] = useState('listening');
@@ -69,6 +69,7 @@ export default function LiveVoiceModal({
   const [aiSpokenText, setAiSpokenText] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [activeLang, setActiveLang] = useState(currentLanguage || 'so-SO');
 
   const recognitionRef = useRef(null);
   const silenceTimerRef = useRef(null);
@@ -78,27 +79,112 @@ export default function LiveVoiceModal({
   const isMutedRef = useRef(false);
   isMutedRef.current = isMuted;
 
+  // Web Audio API refs for real microphone analysis
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const micStreamRef = useRef(null);
+  const animFrameRef = useRef(null);
+
   // Real-Time Streaming Audio Queue
   const speechQueueRef = useRef([]);
   const isQueuePlayingRef = useRef(false);
+
+  // Sync active language
+  useEffect(() => {
+    if (currentLanguage) {
+      setActiveLang(currentLanguage);
+    }
+  }, [currentLanguage]);
+
+  // Real Mic Volume Visualizer using Web Audio API
+  const startAudioMeter = async () => {
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) return;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micStreamRef.current = stream;
+
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+
+      const audioCtx = new AudioContext();
+      audioContextRef.current = audioCtx;
+
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      analyser.smoothingTimeConstant = 0.5;
+      analyserRef.current = analyser;
+
+      const source = audioCtx.createMediaStreamSource(stream);
+      source.connect(analyser);
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      const updateMeter = () => {
+        if (!isOpen) return;
+
+        if (isSpeakingRef.current) {
+          // AI speaking animation simulation
+          setAudioLevel(0.4 + Math.random() * 0.5);
+        } else if (!isMutedRef.current && analyserRef.current) {
+          analyserRef.current.getByteFrequencyData(dataArray);
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+          }
+          const avg = sum / dataArray.length;
+          // Normalize volume 0 to 1
+          const norm = Math.min(Math.max((avg - 10) / 70, 0), 1);
+          setAudioLevel(norm);
+        } else {
+          setAudioLevel(0);
+        }
+
+        animFrameRef.current = requestAnimationFrame(updateMeter);
+      };
+
+      updateMeter();
+    } catch (err) {
+      console.warn("Real mic audio meter not started, using fallback visualizer:", err);
+    }
+  };
+
+  const stopAudioMeter = () => {
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach(t => t.stop());
+      micStreamRef.current = null;
+    }
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      try {
+        audioContextRef.current.close();
+      } catch (_) {}
+      audioContextRef.current = null;
+    }
+  };
 
   // Initialize Speech Recognition & Greeting
   useEffect(() => {
     if (!isOpen) {
       stopAllAudio();
+      stopAudioMeter();
       return;
     }
 
+    startAudioMeter();
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Browser-kaagu ma taageero Web Speech API. Fadlan isticmaal Google Chrome ama Edge.");
+      alert("Browser-kaagu ma taageero Web Speech API. Fadlan isticmaal Google Chrome ama Microsoft Edge.");
       return;
     }
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'so-SO'; // Professional native Somali speech recognition!
+    recognition.lang = activeLang;
     recognitionRef.current = recognition;
 
     recognition.onstart = () => {
@@ -136,19 +222,26 @@ export default function LiveVoiceModal({
         // Reset silence timer on every new speech chunk
         if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
 
-        // Turn-around silence timeout (420ms)
+        // Turn-around silence timeout (460ms)
         silenceTimerRef.current = setTimeout(() => {
           if (currentSpeech.trim() && !isProcessingRef.current) {
             handleSendSpokenQuery(currentSpeech.trim());
           }
-        }, 420);
+        }, 460);
       }
     };
 
     recognition.onerror = (event) => {
       console.warn("Speech recognition error:", event.error);
-      if (event.error === 'not-allowed') {
-        alert("Fadlan oggolow makarafoonka si aad u isticmaasho Live Voice.");
+      if (event.error === 'language-not-supported' && recognition.lang === 'so-SO') {
+        // Fallback to English/multilingual recognition if Somali language model is unavailable in browser
+        console.warn("Somali language model not in browser, falling back to English recognition");
+        recognition.lang = 'en-US';
+        try {
+          recognition.start();
+        } catch (_) {}
+      } else if (event.error === 'not-allowed') {
+        alert("Fadlan oggolow makarafoonka (Allow Microphone) si aad u isticmaasho Live Voice.");
         setVoiceState('listening');
       }
     };
@@ -170,34 +263,20 @@ export default function LiveVoiceModal({
     // Instant Warm Welcome Greeting on Open (Immediate Live Presence)
     const welcomeTimer = setTimeout(() => {
       if (isOpen && !isProcessingRef.current && !userTranscript) {
-        const greeting = "Salaamu calaykum! Waan ku dhagaysanayaa, maxaan kugu caawiyaa oo ku saabsan Jaamacadda Bariga Afrika?";
+        const greeting = activeLang.startsWith('so') 
+          ? "Salaamu calaykum! Waan ku dhagaysanayaa, maxaan kugu caawiyaa oo ku saabsan Jaamacadda Bariga Afrika?"
+          : "Hello! Welcome to East Africa University. How can I help you today?";
         setAiSpokenText(greeting);
-        queueAndSpeakSentence(greeting, 'so-SO');
+        queueAndSpeakSentence(greeting, activeLang);
       }
-    }, 300);
+    }, 350);
 
     return () => {
       clearTimeout(welcomeTimer);
       stopAllAudio();
+      stopAudioMeter();
     };
-  }, [isOpen]);
-
-  // Dynamic Audio Visualizer simulation
-  useEffect(() => {
-    let interval;
-    if (voiceState === 'listening' && !isMuted) {
-      interval = setInterval(() => {
-        setAudioLevel(Math.random() * 0.7 + 0.3);
-      }, 100);
-    } else if (voiceState === 'speaking') {
-      interval = setInterval(() => {
-        setAudioLevel(Math.random() * 0.95 + 0.35);
-      }, 80);
-    } else {
-      setAudioLevel(0);
-    }
-    return () => clearInterval(interval);
-  }, [voiceState, isMuted]);
+  }, [isOpen, activeLang]);
 
   // Stop everything
   const stopAllAudio = () => {
@@ -261,13 +340,13 @@ export default function LiveVoiceModal({
 
     if (nextItem.lang === 'so-SO') {
       selectedVoice = voices.find(v => v.lang.startsWith('so')) ||
-                      voices.find(v => v.name.includes('Natural') && (v.lang.startsWith('en') || v.lang.startsWith('it') || v.lang.startsWith('tr'))) ||
+                      voices.find(v => v.name.includes('Natural') && (v.lang.startsWith('it') || v.lang.startsWith('en') || v.lang.startsWith('tr'))) ||
                       voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) ||
                       voices.find(v => v.lang.startsWith('it')) ||
                       voices.find(v => v.lang.startsWith('sw')) ||
                       voices.find(v => v.lang.startsWith('en')) ||
                       voices[0];
-      utterance.rate = 1.0; // Natural, clear, human pace
+      utterance.rate = 1.0;
       utterance.pitch = 1.0;
     } else {
       selectedVoice = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Premium'))) ||
@@ -302,7 +381,7 @@ export default function LiveVoiceModal({
     if (!query || isProcessingRef.current || isMutedRef.current) return;
 
     isProcessingRef.current = true;
-    setVoiceState('speaking'); // Stay active in conversation mode (no thinking stall)
+    setVoiceState('speaking');
     setUserTranscript(query);
     setAiSpokenText('');
     stopSpeaking();
@@ -327,7 +406,6 @@ export default function LiveVoiceModal({
           queueAndSpeakSentence(phraseToSpeak, chunkLang);
         }
       } else if (phraseBuffer.split(' ').length >= 4) {
-        // If 4 words accumulated without punctuation, speak them right away!
         const words = phraseBuffer.trim();
         phraseBuffer = '';
         if (words) {
@@ -375,11 +453,19 @@ export default function LiveVoiceModal({
       try {
         recognitionRef.current?.stop();
       } catch (_) {}
-      // User is muting THEIR mic to listen peacefully -> Do NOT kill AI's speech!
       if (!isSpeakingRef.current) {
         setVoiceState('muted');
       }
     }
+  };
+
+  const handleLanguageChange = (lang) => {
+    setActiveLang(lang);
+    if (setCurrentLanguage) setCurrentLanguage(lang);
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = lang;
+    }
+    stopSpeaking();
   };
 
   if (!isOpen) return null;
@@ -391,12 +477,13 @@ export default function LiveVoiceModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="fixed inset-0 z-[100] flex flex-col items-center justify-between p-6 md:p-10 select-none overflow-hidden bg-gradient-to-b from-[#080d16]/95 via-[#030712]/98 to-[#000000] text-white backdrop-blur-3xl"
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-between p-4 sm:p-6 md:p-10 select-none overflow-hidden bg-gradient-to-b from-[#080d16]/95 via-[#030712]/98 to-[#000000] text-white backdrop-blur-3xl"
       >
         {/* Top Header Bar */}
-        <div className="w-full max-w-4xl flex items-center justify-between z-10">
-          <div className="flex items-center gap-3">
-            <div className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border shadow-sm backdrop-blur-md transition-all ${
+        <div className="w-full max-w-4xl flex items-center justify-between z-10 gap-2">
+          {/* Status Indicator */}
+          <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-sm backdrop-blur-md transition-all ${
               isMuted
                 ? 'bg-red-500/15 border-red-500/30'
                 : 'bg-white/10 border-white/10'
@@ -411,7 +498,7 @@ export default function LiveVoiceModal({
                   isMuted ? 'bg-red-500' : 'bg-cyan-500'
                 }`}></span>
               </span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-200">
+              <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-200">
                 {voiceState === 'speaking'
                   ? (isMuted ? 'Speaking (Muted)' : 'Speaking')
                   : isMuted ? 'Muted' : 'Listening'}
@@ -419,30 +506,61 @@ export default function LiveVoiceModal({
             </div>
           </div>
 
+          {/* Language Switcher Pills */}
+          <div className="flex items-center bg-white/10 rounded-full p-0.5 sm:p-1 border border-white/10 backdrop-blur-md shadow-sm">
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('so-SO')}
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold transition-all cursor-pointer ${
+                activeLang === 'so-SO'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              🇸🇴 Soomaali
+            </button>
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('en-US')}
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold transition-all cursor-pointer ${
+                activeLang === 'en-US'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              🇬🇧 English
+            </button>
+          </div>
+
+          {/* Close / Exit Button */}
           <button
             type="button"
             onClick={() => {
               stopAllAudio();
               onClose();
             }}
-            className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all cursor-pointer shadow-md"
+            className="p-2 sm:p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all cursor-pointer shadow-md flex-shrink-0 active:scale-95"
             title="Exit Live Voice"
           >
-            <X size={20} />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
-        {/* Center: Dynamic ChatGPT Voice Orb */}
+        {/* Center: Dynamic Fluid Voice Visualizer Orb */}
         <div className="flex-1 flex flex-col items-center justify-center w-full max-w-xl my-auto relative">
           <div className="relative flex items-center justify-center">
-            {/* Outer Ambient Glows */}
+            {/* Outer Ambient Reactive Glow */}
             <div 
-              className={`absolute w-72 h-72 md:w-96 md:h-96 rounded-full transition-all duration-700 blur-3xl pointer-events-none ${
+              style={{
+                transform: `scale(${1 + audioLevel * 0.35})`,
+                opacity: 0.6 + audioLevel * 0.4
+              }}
+              className={`absolute w-60 h-60 sm:w-72 sm:h-72 md:w-96 md:h-96 rounded-full transition-all duration-300 blur-3xl pointer-events-none ${
                 voiceState === 'speaking'
-                  ? 'bg-gradient-to-tr from-blue-600/40 via-cyan-500/30 to-emerald-400/40 scale-125'
+                  ? 'bg-gradient-to-tr from-blue-600/40 via-cyan-500/30 to-emerald-400/40'
                   : isMuted
-                  ? 'bg-slate-700/30 scale-90'
-                  : 'bg-gradient-to-tr from-blue-500/35 via-cyan-400/25 to-sky-300/30 scale-105'
+                  ? 'bg-slate-700/30'
+                  : 'bg-gradient-to-tr from-blue-500/35 via-cyan-400/30 to-sky-300/30'
               }`}
             />
 
@@ -450,14 +568,14 @@ export default function LiveVoiceModal({
             {voiceState === 'listening' && !isMuted && (
               <>
                 <motion.div
-                  animate={{ scale: [1, 1.45, 1], opacity: [0.3, 0, 0.3] }}
+                  animate={{ scale: [1, 1.4 + audioLevel * 0.2, 1], opacity: [0.3, 0, 0.3] }}
                   transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
-                  className="absolute w-56 h-56 md:w-72 md:h-72 rounded-full border border-cyan-400/40 pointer-events-none"
+                  className="absolute w-44 h-44 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full border border-cyan-400/40 pointer-events-none"
                 />
                 <motion.div
-                  animate={{ scale: [1, 1.7, 1], opacity: [0.2, 0, 0.2] }}
+                  animate={{ scale: [1, 1.6 + audioLevel * 0.3, 1], opacity: [0.2, 0, 0.2] }}
                   transition={{ duration: 2.2, delay: 0.5, repeat: Infinity, ease: 'easeOut' }}
-                  className="absolute w-56 h-56 md:w-72 md:h-72 rounded-full border border-blue-400/30 pointer-events-none"
+                  className="absolute w-44 h-44 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full border border-blue-400/30 pointer-events-none"
                 />
               </>
             )}
@@ -469,45 +587,53 @@ export default function LiveVoiceModal({
               }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              className={`relative w-48 h-48 md:w-64 md:h-64 rounded-full flex items-center justify-center cursor-pointer shadow-2xl transition-all duration-500 overflow-hidden ${
+              style={{
+                transform: `scale(${1 + audioLevel * 0.12})`
+              }}
+              className={`relative w-44 h-44 sm:w-52 sm:h-52 md:w-64 md:h-64 rounded-full flex items-center justify-center cursor-pointer shadow-2xl transition-all duration-300 overflow-hidden ${
                 voiceState === 'speaking'
-                  ? 'bg-gradient-to-tr from-blue-600 via-cyan-400 to-indigo-600 animate-orb-speaking shadow-cyan-500/30'
+                  ? 'bg-gradient-to-tr from-blue-600 via-cyan-400 to-indigo-600 animate-orb-speaking shadow-cyan-500/40'
                   : isMuted
                   ? 'bg-slate-800 border-2 border-red-500/30 shadow-red-500/10'
-                  : 'bg-gradient-to-tr from-blue-600 via-cyan-500 to-blue-400 animate-orb-breathe shadow-blue-500/30'
+                  : 'bg-gradient-to-tr from-blue-600 via-cyan-500 to-blue-400 animate-orb-breathe shadow-blue-500/40'
               }`}
             >
-              <div className="absolute inset-2 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center">
+              <div className="absolute inset-2 sm:inset-3 rounded-full bg-black/25 backdrop-blur-md flex items-center justify-center">
+                {/* Speaking Waveform Bars */}
                 {voiceState === 'speaking' && (
-                  <div className="flex items-center gap-1.5 z-10">
-                    {[0.6, 1, 0.4, 0.85, 0.5, 0.9, 0.7].map((heightScale, i) => (
+                  <div className="flex items-center gap-1.5 sm:gap-2 z-10">
+                    {[0.6, 1, 0.45, 0.9, 0.5, 0.95, 0.7].map((heightScale, i) => (
                       <motion.div
                         key={i}
-                        animate={{ height: ['12px', `${heightScale * 48}px`, '12px'] }}
-                        transition={{ duration: 0.6 + i * 0.08, repeat: Infinity, ease: 'easeInOut' }}
-                        className="w-1.5 rounded-full bg-white shadow-sm"
+                        animate={{ height: ['10px', `${Math.max(16, heightScale * 50 * (0.5 + audioLevel * 0.7))}px`, '10px'] }}
+                        transition={{ duration: 0.5 + i * 0.07, repeat: Infinity, ease: 'easeInOut' }}
+                        className="w-1.5 sm:w-2 rounded-full bg-white shadow-sm"
                       />
                     ))}
                   </div>
                 )}
 
+                {/* Listening Audio Reactive Wave Bars */}
                 {voiceState === 'listening' && !isMuted && (
-                  <div className="flex items-center gap-1 z-10">
-                    {[16, 28, 42, 28, 16].map((h, i) => (
+                  <div className="flex items-center gap-1.5 sm:gap-2 z-10">
+                    {[14, 26, 44, 26, 14].map((baseH, i) => (
                       <motion.div
                         key={i}
-                        animate={{ height: [`${h * 0.4}px`, `${h * (audioLevel + 0.3)}px`, `${h * 0.4}px`] }}
-                        transition={{ duration: 0.25, repeat: Infinity, ease: 'easeInOut' }}
-                        className="w-1.5 rounded-full bg-white/90"
+                        style={{
+                          height: `${Math.max(8, baseH * (0.3 + audioLevel * 1.2))}px`
+                        }}
+                        transition={{ duration: 0.1 }}
+                        className="w-1.5 sm:w-2 rounded-full bg-white/90 shadow-sm"
                       />
                     ))}
                   </div>
                 )}
 
+                {/* Muted Display */}
                 {isMuted && voiceState !== 'speaking' && (
                   <div className="flex flex-col items-center gap-2 text-red-300">
-                    <MicOff size={40} className="animate-pulse" />
-                    <span className="text-xs font-semibold uppercase tracking-wider">Muted</span>
+                    <MicOff className="w-8 h-8 sm:w-10 sm:h-10 animate-pulse" />
+                    <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Muted</span>
                   </div>
                 )}
               </div>
@@ -515,14 +641,14 @@ export default function LiveVoiceModal({
           </div>
 
           {/* Subtitle / Live Transcript Card */}
-          <div className="mt-8 md:mt-12 w-full max-w-lg min-h-[90px] flex flex-col items-center justify-center text-center px-4">
+          <div className="mt-6 sm:mt-10 w-full max-w-lg min-h-[85px] flex flex-col items-center justify-center text-center px-3 sm:px-4">
             {voiceState === 'speaking' && aiSpokenText && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white/10 border border-white/15 px-5 py-3 rounded-2xl backdrop-blur-xl shadow-lg"
+                className="bg-white/10 border border-white/15 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl backdrop-blur-xl shadow-lg max-w-full"
               >
-                <p className="text-sm md:text-base text-slate-100 font-medium leading-relaxed line-clamp-3">
+                <p className="text-xs sm:text-sm md:text-base text-slate-100 font-medium leading-relaxed line-clamp-3">
                   "{aiSpokenText}"
                 </p>
               </motion.div>
@@ -532,35 +658,40 @@ export default function LiveVoiceModal({
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-blue-500/15 border border-blue-400/30 px-5 py-3 rounded-2xl backdrop-blur-xl shadow-lg"
+                className="bg-blue-500/20 border border-blue-400/35 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl backdrop-blur-xl shadow-lg max-w-full"
               >
-                <p className="text-sm md:text-base text-cyan-200 font-medium leading-relaxed">
+                <p className="text-xs sm:text-sm md:text-base text-cyan-200 font-medium leading-relaxed">
                   "{userTranscript}"
                 </p>
               </motion.div>
             )}
 
             {isMuted && voiceState !== 'speaking' && (
-              <p className="text-xs md:text-sm text-red-300/90 font-medium bg-red-500/10 px-4 py-1.5 rounded-full border border-red-500/20">
-                Microphone is muted. Tap Unmute to speak.
+              <p className="text-xs sm:text-sm text-red-300/90 font-medium bg-red-500/10 px-4 py-1.5 rounded-full border border-red-500/20">
+                Makarafoonku wuu aamusan yahay. Riix Unmute si aad u hadasho.
               </p>
             )}
 
             {!isMuted && !userTranscript && !aiSpokenText && (
-              <p className="text-sm md:text-base text-slate-400 font-light">
-                Listening... Speak naturally
+              <p className="text-xs sm:text-sm md:text-base text-slate-400 font-light flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+                <span>
+                  {activeLang.startsWith('so') 
+                    ? "Waan ku dhagaysanayaa... Si dabiici ah ula hadal EAU" 
+                    : "Listening... Speak naturally with EAU"}
+                </span>
               </p>
             )}
           </div>
         </div>
 
         {/* Bottom Control Bar */}
-        <div className="w-full max-w-md flex items-center justify-center gap-4 md:gap-6 z-10 pb-4">
-          {/* Mute / Unmute Button in concise English */}
+        <div className="w-full max-w-md flex items-center justify-center gap-3 sm:gap-5 z-10 pb-2 sm:pb-4">
+          {/* Mute / Unmute Button */}
           <button
             type="button"
             onClick={handleToggleMute}
-            className={`px-5 py-3.5 rounded-full transition-all cursor-pointer shadow-lg active:scale-95 flex items-center gap-2.5 font-medium text-sm ${
+            className={`px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-full transition-all cursor-pointer shadow-lg active:scale-95 flex items-center gap-2 font-medium text-xs sm:text-sm ${
               isMuted
                 ? 'bg-red-500/25 text-red-300 border border-red-500/50 hover:bg-red-500/35 ring-2 ring-red-500/30'
                 : 'bg-white/15 text-white border border-white/20 hover:bg-white/25'
@@ -569,38 +700,40 @@ export default function LiveVoiceModal({
           >
             {isMuted ? (
               <>
-                <MicOff size={20} className="text-red-400" />
+                <MicOff className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
                 <span>Unmute</span>
               </>
             ) : (
               <>
-                <Mic size={20} className="text-cyan-300" />
+                <Mic className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-300" />
                 <span>Mute</span>
               </>
             )}
           </button>
 
+          {/* Stop AI Speaking Button */}
           {voiceState === 'speaking' && (
             <button
               type="button"
               onClick={stopSpeaking}
-              className="p-3.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all cursor-pointer shadow-lg active:scale-95"
-              title="Stop"
+              className="p-2.5 sm:p-3.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all cursor-pointer shadow-lg active:scale-95"
+              title="Stop speaking"
             >
-              <VolumeX size={20} />
+              <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           )}
 
+          {/* End Call Button */}
           <button
             type="button"
             onClick={() => {
               stopAllAudio();
               onClose();
             }}
-            className="px-5 py-3.5 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all cursor-pointer shadow-xl active:scale-95 flex items-center gap-2 font-medium text-sm"
-            title="End"
+            className="px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all cursor-pointer shadow-xl active:scale-95 flex items-center gap-2 font-medium text-xs sm:text-sm"
+            title="End Session"
           >
-            <X size={20} />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>End</span>
           </button>
         </div>

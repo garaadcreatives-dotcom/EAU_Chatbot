@@ -131,7 +131,7 @@ export default function Drawer({
               onClose();
             }
           }}
-          className={`relative flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all text-sm ${
+          className={`relative flex items-center justify-between px-3.5 py-3 rounded-xl cursor-pointer transition-all text-base ${
             isActive
               ? theme === 'dark'
                 ? 'bg-[#212121] text-white font-medium shadow-sm'
@@ -336,7 +336,7 @@ export default function Drawer({
             {/* Drawer Header */}
             <div className="p-4 flex items-center justify-between border-b border-inherit">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center bg-white shadow-sm border border-slate-200 dark:border-slate-800 flex-shrink-0">
+                <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center bg-white shadow-sm border border-slate-200 dark:border-slate-800 flex-shrink-0">
                   <img 
                     src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQflmfbmpLajicm82NGmm6dAcXd0ERTuoCdEFZe1MriM2NxGzKKzkne_so&s=10" 
                     alt="EAU" 
@@ -344,7 +344,7 @@ export default function Drawer({
                   />
                 </div>
                 <div>
-                  <h2 className="font-semibold text-sm tracking-tight">Recent Chats</h2>
+                  <h2 className="font-bold text-base sm:text-lg tracking-tight">Recent Chats</h2>
                 </div>
               </div>
               <button
@@ -352,7 +352,7 @@ export default function Drawer({
                 className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer active:scale-95"
                 title="Close"
               >
-                <X size={18} />
+                <X size={20} />
               </button>
             </div>
 
@@ -363,27 +363,27 @@ export default function Drawer({
                   onNewChat();
                   onClose();
                 }}
-                className="w-full py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 font-medium text-xs md:text-sm transition-all shadow-sm active:scale-95 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
+                className="w-full py-3 px-4 rounded-xl flex items-center justify-center gap-2 font-semibold text-sm sm:text-base transition-all shadow-sm active:scale-95 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
               >
-                <Plus size={16} className="stroke-[2.5]" />
+                <Plus size={18} className="stroke-[2.5]" />
                 <span>New Conversation</span>
               </button>
             </div>
 
             {/* Search History Input */}
             <div className="p-3 border-b border-inherit">
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all ${
+              <div className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border transition-all ${
                 theme === 'dark' 
                   ? 'bg-[#1c1c1c] border-[#2c2c2c] focus-within:border-blue-500' 
                   : 'bg-slate-100 border-slate-200 focus-within:border-blue-400 focus-within:bg-white'
               }`}>
-                <Search size={14} className="text-slate-400 flex-shrink-0" />
+                <Search size={16} className="text-slate-400 flex-shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search chats..."
-                  className="bg-transparent text-xs w-full focus:outline-none text-slate-900 dark:text-white placeholder-slate-400"
+                  className="bg-transparent text-sm sm:text-base w-full focus:outline-none text-slate-900 dark:text-white placeholder-slate-400"
                 />
                 {searchQuery && (
                   <button 

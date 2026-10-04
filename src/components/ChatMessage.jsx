@@ -40,7 +40,7 @@ const renderFormattedMessage = (rawText, theme = 'light') => {
           parts.push(
             <code 
               key={`${sIdx}-${match.index}`} 
-              className={`px-1.5 py-0.5 rounded text-xs md:text-sm font-mono font-medium ${
+              className={`px-2 py-0.5 rounded text-sm sm:text-base font-mono font-medium ${
                 theme === 'dark' ? 'bg-white/15 text-blue-300' : 'bg-black/10 text-blue-700'
               }`}
             >
@@ -93,7 +93,7 @@ const renderFormattedMessage = (rawText, theme = 'light') => {
       }
       i++; // skip closing ```
       blocks.push(
-        <pre key={`code-${i}`} className={`my-4 p-5 rounded-2xl overflow-x-auto text-sm md:text-base font-mono ${
+        <pre key={`code-${i}`} className={`my-4 p-5 rounded-2xl overflow-x-auto text-sm sm:text-base md:text-lg font-mono leading-relaxed ${
           theme === 'dark' ? 'bg-[#181818] text-slate-200 border border-[#2a2a2a]' : 'bg-slate-900 text-slate-100'
         }`}>
           <code>{codeLines.join('\n')}</code>
@@ -105,7 +105,7 @@ const renderFormattedMessage = (rawText, theme = 'light') => {
     // Headings (###, ##, #)
     if (line.startsWith('### ')) {
       blocks.push(
-        <h3 key={`h3-${i}`} style={{ color: textColor }} className="text-base sm:text-lg md:text-xl font-bold mt-4 mb-2">
+        <h3 key={`h3-${i}`} style={{ color: textColor }} className="text-lg sm:text-xl md:text-2xl font-bold mt-4 mb-2">
           {formatInline(line.slice(4))}
         </h3>
       );
@@ -114,7 +114,7 @@ const renderFormattedMessage = (rawText, theme = 'light') => {
     }
     if (line.startsWith('## ')) {
       blocks.push(
-        <h2 key={`h2-${i}`} style={{ color: textColor }} className="text-lg sm:text-xl md:text-2xl font-bold mt-5 mb-2.5">
+        <h2 key={`h2-${i}`} style={{ color: textColor }} className="text-xl sm:text-2xl md:text-[1.65rem] font-bold mt-5 mb-2.5">
           {formatInline(line.slice(3))}
         </h2>
       );
@@ -123,7 +123,7 @@ const renderFormattedMessage = (rawText, theme = 'light') => {
     }
     if (line.startsWith('# ')) {
       blocks.push(
-        <h1 key={`h1-${i}`} style={{ color: textColor }} className="text-xl sm:text-2xl md:text-3xl font-extrabold mt-6 mb-3">
+        <h1 key={`h1-${i}`} style={{ color: textColor }} className="text-2xl sm:text-3xl md:text-4xl font-extrabold mt-6 mb-3">
           {formatInline(line.slice(2))}
         </h1>
       );
@@ -160,11 +160,11 @@ const renderFormattedMessage = (rawText, theme = 'light') => {
               theme === 'dark' ? 'border-[#2f2f2f] bg-[#121212]' : 'border-slate-200 bg-white'
             }`}
           >
-            <table className="min-w-full divide-y divide-inherit text-left text-xs sm:text-sm md:text-base">
+            <table className="min-w-full divide-y divide-inherit text-left text-sm sm:text-base md:text-lg">
               <thead className={theme === 'dark' ? 'bg-[#1c1c1c]' : 'bg-slate-100'}>
                 <tr>
                   {headerRow.map((cell, cIdx) => (
-                    <th key={cIdx} style={{ color: textColor }} className="px-3 sm:px-5 py-2.5 sm:py-3.5 font-bold whitespace-nowrap">
+                    <th key={cIdx} style={{ color: textColor }} className="px-4 sm:px-6 py-3 sm:py-4 font-bold whitespace-nowrap">
                       {formatInline(cell)}
                     </th>
                   ))}
@@ -181,7 +181,7 @@ const renderFormattedMessage = (rawText, theme = 'light') => {
                       }`}
                     >
                       {cells.map((cell, cIdx) => (
-                        <td key={cIdx} style={{ color: textColor }} className="px-3 sm:px-5 py-2 sm:py-3 font-normal align-top leading-relaxed">
+                        <td key={cIdx} style={{ color: textColor }} className="px-4 sm:px-6 py-2.5 sm:py-3.5 font-normal align-top leading-relaxed">
                           {formatInline(cell)}
                         </td>
                       ))}
@@ -200,8 +200,8 @@ const renderFormattedMessage = (rawText, theme = 'light') => {
     if (/^\s*[-*•]\s+/.test(line)) {
       const itemText = line.replace(/^\s*[-*•]\s+/, '');
       blocks.push(
-        <div key={`li-${i}`} style={{ color: textColor }} className="flex items-start gap-2.5 sm:gap-3.5 my-1.5 sm:my-2.5 text-sm sm:text-base md:text-[17px] leading-relaxed">
-          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-600 mt-2 sm:mt-2.5 flex-shrink-0" />
+        <div key={`li-${i}`} style={{ color: textColor }} className="flex items-start gap-2.5 sm:gap-3.5 my-2 sm:my-3 text-base sm:text-lg md:text-[1.125rem] leading-[1.75]">
+          <span className="w-2 h-2 rounded-full bg-blue-600 mt-2.5 flex-shrink-0" />
           <span>{formatInline(itemText)}</span>
         </div>
       );
@@ -216,7 +216,7 @@ const renderFormattedMessage = (rawText, theme = 'light') => {
     }
 
     blocks.push(
-      <p key={`p-${i}`} style={{ color: textColor }} className="my-1.5 sm:my-2.5 text-sm sm:text-base md:text-[17px] leading-relaxed">
+      <p key={`p-${i}`} style={{ color: textColor }} className="my-2 sm:my-3 text-base sm:text-lg md:text-[1.125rem] leading-[1.75]">
         {formatInline(line)}
       </p>
     );
@@ -322,7 +322,7 @@ export default function ChatMessage({
           <div className="flex flex-col items-end max-w-full">
             {/* Soft Bubble */}
             <div
-              className={`px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 md:py-3.5 rounded-2xl md:rounded-[26px] text-sm sm:text-base md:text-[17px] leading-relaxed break-words ${
+              className={`px-4.5 sm:px-6 md:px-7 py-3 sm:py-3.5 md:py-4 rounded-2xl md:rounded-[26px] text-base sm:text-lg md:text-[1.125rem] leading-relaxed break-words ${
                 theme === 'dark' ? 'bg-[#0284c7] text-white font-normal shadow-sm' : 'bg-[#f4f4f4] text-slate-900 font-normal shadow-sm'
               }`}
             >
@@ -330,30 +330,30 @@ export default function ChatMessage({
             </div>
 
             {/* User Action Bar (Copy, Share, Edit) */}
-            <div className="flex items-center gap-2 sm:gap-3.5 mt-1.5 sm:mt-2 mr-1 text-[#8e8e8e] dark:text-[#9e9e9e]">
+            <div className="flex items-center gap-2.5 sm:gap-4 mt-2 mr-1 text-[#8e8e8e] dark:text-[#9e9e9e]">
               <button
                 type="button"
                 onClick={() => onCopy(message.id, message.content)}
-                className="p-1 sm:p-1.5 rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                 title="Copy"
               >
-                {copiedId === message.id ? <Check className="w-4 h-4 text-green-500" /> : <ModernCopyIcon className="w-4 h-4 sm:w-5 sm:h-5" />}
+                {copiedId === message.id ? <Check className="w-4.5 h-4.5 text-green-500" /> : <ModernCopyIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />}
               </button>
               <button
                 type="button"
                 onClick={onShare}
-                className="p-1 sm:p-1.5 rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                 title="Share"
               >
-                <ModernShareIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ModernShareIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
               </button>
               <button
                 type="button"
                 onClick={() => onStartEdit(message)}
-                className="p-1 sm:p-1.5 rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                 title="Edit"
               >
-                <ModernEditIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ModernEditIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
@@ -364,67 +364,67 @@ export default function ChatMessage({
 
   // BOT MESSAGE (Clean Canvas Text)
   return (
-    <div className="flex flex-col items-start max-w-full md:max-w-[95%] space-y-1 sm:space-y-2">
-      <div style={{ color: theme === 'dark' ? '#ffffff' : '#0f172a' }} className="text-sm sm:text-base md:text-[17px] leading-relaxed whitespace-pre-wrap py-1 sm:py-2 font-normal w-full break-words">
+    <div className="flex flex-col items-start max-w-full md:max-w-[95%] space-y-1.5 sm:space-y-2.5">
+      <div style={{ color: theme === 'dark' ? '#ffffff' : '#0f172a' }} className="text-base sm:text-lg md:text-[1.125rem] leading-[1.75] whitespace-pre-wrap py-1.5 sm:py-2.5 font-normal w-full break-words">
         <TypewriterMessage text={message.content} isTyping={message.isTyping} theme={theme} />
       </div>
 
       {/* Bot Action Bar */}
       {!message.isTyping && (
-        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-1 text-slate-400 dark:text-slate-500">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5 text-slate-400 dark:text-slate-500">
           <button
             onClick={() => onCopy(message.id, message.content)}
-            className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
             title="Copy"
           >
-            {copiedId === message.id ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" /> : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+            {copiedId === message.id ? <Check className="w-4 h-4 sm:w-[1.15rem] sm:h-[1.15rem] text-green-500" /> : <Copy className="w-4 h-4 sm:w-[1.15rem] sm:h-[1.15rem]" />}
           </button>
 
           <button
             onClick={() => onSpeak(message.id, message.content)}
-            className={`p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] transition-colors cursor-pointer ${
+            className={`p-1.5 sm:p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] transition-colors cursor-pointer ${
               speakingId === message.id ? 'text-blue-500 bg-blue-50 dark:bg-[#212121]' : 'hover:text-slate-700 dark:hover:text-slate-200'
             }`}
             title={speakingId === message.id ? 'Stop' : 'Listen'}
           >
-            <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <Volume2 className="w-4 h-4 sm:w-[1.15rem] sm:h-[1.15rem]" />
           </button>
 
           <button
             onClick={() => onRegenerate(message.id)}
             disabled={isLoading}
-            className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] hover:text-slate-700 dark:hover:text-slate-200 transition-colors disabled:opacity-50 cursor-pointer"
+            className="p-1.5 sm:p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] hover:text-slate-700 dark:hover:text-slate-200 transition-colors disabled:opacity-50 cursor-pointer"
             title="Regenerate"
           >
-            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <RotateCcw className="w-4 h-4 sm:w-[1.15rem] sm:h-[1.15rem]" />
           </button>
 
           <button
             onClick={() => onFeedback(message.id, 'up')}
-            className={`p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] transition-colors cursor-pointer ${
+            className={`p-1.5 sm:p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] transition-colors cursor-pointer ${
               message.feedback === 'up' ? 'text-green-500 bg-green-50 dark:bg-[#212121]' : 'hover:text-slate-700 dark:hover:text-slate-200'
             }`}
             title="Good response"
           >
-            <ThumbsUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <ThumbsUp className="w-4 h-4 sm:w-[1.15rem] sm:h-[1.15rem]" />
           </button>
 
           <button
             onClick={() => onFeedback(message.id, 'down')}
-            className={`p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] transition-colors cursor-pointer ${
+            className={`p-1.5 sm:p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] transition-colors cursor-pointer ${
               message.feedback === 'down' ? 'text-red-500 bg-red-50 dark:bg-[#212121]' : 'hover:text-slate-700 dark:hover:text-slate-200'
             }`}
             title="Bad response"
           >
-            <ThumbsDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <ThumbsDown className="w-4 h-4 sm:w-[1.15rem] sm:h-[1.15rem]" />
           </button>
 
           <button
             onClick={onShare}
-            className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a1a1a] hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
             title="Share"
           >
-            <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <Share2 className="w-4 h-4 sm:w-[1.15rem] sm:h-[1.15rem]" />
           </button>
         </div>
       )}

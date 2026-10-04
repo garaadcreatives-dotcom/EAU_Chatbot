@@ -29,27 +29,36 @@ function cleanTextForSpeech(text, lang = 'so-SO') {
   let cleaned = text
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/https?:\/\/\S+/gi, ' ')
     .replace(/\|/g, ' ')
-    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, ' ')
+    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}]/gu, ' ')
     .replace(/[#*_~`]/g, '')
     .replace(/<\/?[^>]+(>|$)/g, ' ')
     .replace(/\+/g, ' plus ')
-    .replace(/\$/g, ' dollar ')
+    .replace(/\$/g, ' doolar ')
     .replace(/\s+/g, ' ')
     .trim();
 
-  // Natural phonetic expansions for spoken clarity
+  // Natural phonetic expansions for conversational clarity
   if (lang === 'so-SO') {
     cleaned = cleaned
       .replace(/\b1aad\b/gi, 'koowaad')
       .replace(/\b2aad\b/gi, 'labaad')
       .replace(/\b3aad\b/gi, 'saddexaad')
       .replace(/\b4aad\b/gi, 'afarad')
+      .replace(/\bEAU\s*Garowe\b/gi, 'Jaamacadda Bariga Afrika Faraca Garowe')
+      .replace(/\bEAU\b/gi, 'Jaamacadda Bariga Afrika')
+      .replace(/\bFinal[- ]?ka\b/gi, 'Faynaalka')
+      .replace(/\bMid[- ]?term[- ]?ka\b/gi, 'Mid-termka')
+      .replace(/\bSemester[- ]?ka\b/gi, 'Semestarka')
+      .replace(/\bSemester\b/gi, 'Semestar')
       .replace(/\b(\d+)\s*USD\b/gi, '$1 doolar')
-      .replace(/\bEAU\b/gi, 'I-Ey-Yu')
+      .replace(/\bSh\.\s*/gi, 'Sheekh ')
+      .replace(/\bDr\.\s*/gi, 'Dhaqtar ')
+      .replace(/\bProf\.\s*/gi, 'Borofasoor ')
       .replace(/\bIT\b/gi, 'Ay-Tii')
       .replace(/\bHRM\b/gi, 'Heych-Ar-Em')
-      .replace(/\bMBBS\b/gi, 'Em-Bii-Bii-Es');
+      .replace(/\bMBBS\b/gi, 'Kulliyadda Caafimaadka');
   }
 
   return cleaned;
@@ -340,20 +349,21 @@ export default function LiveVoiceModal({
 
     if (nextItem.lang === 'so-SO') {
       selectedVoice = voices.find(v => v.lang.startsWith('so')) ||
-                      voices.find(v => v.name.includes('Natural') && (v.lang.startsWith('it') || v.lang.startsWith('en') || v.lang.startsWith('tr'))) ||
-                      voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) ||
+                      voices.find(v => v.name.includes('Natural') && (v.lang.startsWith('it') || v.name.includes('Jenny') || v.name.includes('Sonia') || v.name.includes('Aria') || v.lang.startsWith('sw') || v.lang.startsWith('tr'))) ||
+                      voices.find(v => v.name.includes('Natural')) ||
+                      voices.find(v => v.name.includes('Google') && (v.lang.startsWith('en') || v.lang.startsWith('it'))) ||
                       voices.find(v => v.lang.startsWith('it')) ||
                       voices.find(v => v.lang.startsWith('sw')) ||
                       voices.find(v => v.lang.startsWith('en')) ||
                       voices[0];
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
+      utterance.rate = 0.98; // Relaxed, friendly, and human pace
+      utterance.pitch = 1.04; // Warm, approachable, smiling pitch
     } else {
-      selectedVoice = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Premium'))) ||
+      selectedVoice = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Natural') || v.name.includes('Jenny') || v.name.includes('Aria') || v.name.includes('Google'))) ||
                       voices.find(v => v.lang.startsWith('en')) ||
                       voices[0];
       utterance.rate = 1.0;
-      utterance.pitch = 1.0;
+      utterance.pitch = 1.03;
     }
 
     if (selectedVoice) {

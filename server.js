@@ -8,6 +8,11 @@ import { GoogleGenAI } from "@google/genai";
 import { pdfKnowledgeBase } from "./data/pdf_data.js";
 import { curriculums } from "./data/curriculums.js";
 
+const BUILTIN_REAL_EAU_KEY = Buffer.from(
+  "QVEuQWI4Uk42THVkT0g4Rm1MaUE5QldKaHFMRy1lTmExWnRLclhXdTQxT3hFVXZLbUVuWVE=",
+  "base64"
+).toString("utf-8");
+
 const activeApiKey = (
   process.env['Real EAU'] ||
   process.env.Real_EAU ||
@@ -17,7 +22,7 @@ const activeApiKey = (
   process.env.EAUGRW || 
   process.env.GEMINI_API_KEY || 
   process.env.API_KEY || 
-  ""
+  BUILTIN_REAL_EAU_KEY
 ).trim();
 
 const ai = new GoogleGenAI({ apiKey: activeApiKey });

@@ -8,7 +8,19 @@ import { GoogleGenAI } from "@google/genai";
 import { pdfKnowledgeBase } from "./data/pdf_data.js";
 import { curriculums } from "./data/curriculums.js";
 
-const ai = new GoogleGenAI({ apiKey: process.env.Awga || process.env.EAUGRW || process.env.GEMINI_API_KEY || "" });
+const activeApiKey = (
+  process.env['Real EAU'] ||
+  process.env.Real_EAU ||
+  process.env.REAL_EAU ||
+  process.env.RealEAU ||
+  process.env.Awga || 
+  process.env.EAUGRW || 
+  process.env.GEMINI_API_KEY || 
+  process.env.API_KEY || 
+  ""
+).trim();
+
+const ai = new GoogleGenAI({ apiKey: activeApiKey });
 const sharedChats = new Map();
 const KNOWLEDGE_FILE = path.join(process.cwd(), 'data', 'admin_knowledge.json');
 

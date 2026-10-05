@@ -36,6 +36,8 @@ function cleanTextForSpeech(text, lang = 'so-SO') {
     .replace(/<\/?[^>]+(>|$)/g, ' ')
     .replace(/\+/g, ' plus ')
     .replace(/\$/g, ' doolar ')
+    .replace(/&/g, ' iyo ')
+    .replace(/%/g, ' boqolkiiba ')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -48,6 +50,11 @@ function cleanTextForSpeech(text, lang = 'so-SO') {
       .replace(/\b4aad\b/gi, 'afarad')
       .replace(/\bEAU\s*Garowe\b/gi, 'Jaamacadda Bariga Afrika Faraca Garowe')
       .replace(/\bEAU\b/gi, 'Jaamacadda Bariga Afrika')
+      .replace(/\b2026[- ]?2027\b/g, 'laba kun lix iyo labaatan ilaa laba kun toddoba iyo labaatan')
+      .replace(/\b2026\b/g, 'laba kun iyo lix iyo labaatan')
+      .replace(/\b2027\b/g, 'laba kun iyo toddoba iyo labaatan')
+      .replace(/\b1999\b/g, 'sagaal iyo toban boqol iyo sagaashan iyo sagaal')
+      .replace(/\b2009\b/g, 'laba kun iyo sagaal')
       .replace(/\bFinal[- ]?ka\b/gi, 'Faynaalka')
       .replace(/\bMid[- ]?term[- ]?ka\b/gi, 'Mid-termka')
       .replace(/\bSemester[- ]?ka\b/gi, 'Semestarka')
@@ -231,12 +238,12 @@ export default function LiveVoiceModal({
         // Reset silence timer on every new speech chunk
         if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
 
-        // Turn-around silence timeout (460ms)
+        // Turn-around silence timeout - ultra snappy & responsive (290ms)
         silenceTimerRef.current = setTimeout(() => {
           if (currentSpeech.trim() && !isProcessingRef.current) {
             handleSendSpokenQuery(currentSpeech.trim());
           }
-        }, 460);
+        }, 290);
       }
     };
 
@@ -269,16 +276,16 @@ export default function LiveVoiceModal({
       setVoiceState('listening');
     } catch (_) {}
 
-    // Instant Warm Welcome Greeting on Open (Immediate Live Presence)
+    // Instant Warm & Enthusiastic Welcome Greeting on Open
     const welcomeTimer = setTimeout(() => {
       if (isOpen && !isProcessingRef.current && !userTranscript) {
         const greeting = activeLang.startsWith('so') 
-          ? "Salaamu calaykum! Waan ku dhagaysanayaa, maxaan kugu caawiyaa oo ku saabsan Jaamacadda Bariga Afrika?"
-          : "Hello! Welcome to East Africa University. How can I help you today?";
+          ? "Salaamu calaykum! Kusoo dhawow Jaamacadda Bariga Afrika Faraca Garowe! Waan ku dhagaysanayaa, maxaan kugu caawiyaa maanta?"
+          : "Hello and welcome to East Africa University Garowe! I am excited to help you, what would you like to ask?";
         setAiSpokenText(greeting);
         queueAndSpeakSentence(greeting, activeLang);
       }
-    }, 350);
+    }, 250);
 
     return () => {
       clearTimeout(welcomeTimer);
@@ -349,21 +356,22 @@ export default function LiveVoiceModal({
 
     if (nextItem.lang === 'so-SO') {
       selectedVoice = voices.find(v => v.lang.startsWith('so')) ||
-                      voices.find(v => v.name.includes('Natural') && (v.lang.startsWith('it') || v.name.includes('Jenny') || v.name.includes('Sonia') || v.name.includes('Aria') || v.lang.startsWith('sw') || v.lang.startsWith('tr'))) ||
+                      voices.find(v => v.name.includes('Natural') && (v.name.includes('Jenny') || v.name.includes('Ava') || v.name.includes('Aria') || v.name.includes('Guy') || v.name.includes('Andrew') || v.name.includes('Emma') || v.name.includes('Sonia') || v.lang.startsWith('it') || v.lang.startsWith('sw') || v.lang.startsWith('tr') || v.lang.startsWith('es'))) ||
                       voices.find(v => v.name.includes('Natural')) ||
-                      voices.find(v => v.name.includes('Google') && (v.lang.startsWith('en') || v.lang.startsWith('it'))) ||
+                      voices.find(v => v.name.includes('Google') && (v.lang.startsWith('it') || v.lang.startsWith('es') || v.lang.startsWith('en'))) ||
                       voices.find(v => v.lang.startsWith('it')) ||
                       voices.find(v => v.lang.startsWith('sw')) ||
+                      voices.find(v => v.lang.startsWith('es')) ||
                       voices.find(v => v.lang.startsWith('en')) ||
                       voices[0];
-      utterance.rate = 0.98; // Relaxed, friendly, and human pace
-      utterance.pitch = 1.04; // Warm, approachable, smiling pitch
+      utterance.rate = 1.15; // Fast, energetic, and snappy human pace (zero drag/lag)
+      utterance.pitch = 1.06; // Vibrant, confident, and smiling pitch
     } else {
-      selectedVoice = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Natural') || v.name.includes('Jenny') || v.name.includes('Aria') || v.name.includes('Google'))) ||
+      selectedVoice = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Natural') || v.name.includes('Jenny') || v.name.includes('Ava') || v.name.includes('Aria') || v.name.includes('Andrew') || v.name.includes('Google'))) ||
                       voices.find(v => v.lang.startsWith('en')) ||
                       voices[0];
-      utterance.rate = 1.0;
-      utterance.pitch = 1.03;
+      utterance.rate = 1.16; // Fast, energetic, and upbeat pace
+      utterance.pitch = 1.05; // Lively, warm pitch
     }
 
     if (selectedVoice) {
@@ -406,8 +414,8 @@ export default function LiveVoiceModal({
       fullAccumulatedText += chunkText;
       setAiSpokenText(fullAccumulatedText);
 
-      // Early phrase boundary detection for instantaneous voice delivery
-      const match = phraseBuffer.match(/([^,.!?\n]+[,.!?\n]+)\s*/);
+      // Instant phrase boundary detection for instantaneous voice delivery
+      const match = phraseBuffer.match(/([^,.!?:\n]+[,.!?:\n]+)\s*/);
       if (match) {
         const phraseToSpeak = match[1].trim();
         phraseBuffer = phraseBuffer.slice(match[0].length);
@@ -415,7 +423,8 @@ export default function LiveVoiceModal({
           const chunkLang = detectLanguage(phraseToSpeak) || detectedLang;
           queueAndSpeakSentence(phraseToSpeak, chunkLang);
         }
-      } else if (phraseBuffer.split(' ').length >= 4) {
+      } else if (phraseBuffer.split(/\s+/).filter(Boolean).length >= 3) {
+        // Trigger as soon as 3 words arrive for instant zero-lag spoken delivery
         const words = phraseBuffer.trim();
         phraseBuffer = '';
         if (words) {

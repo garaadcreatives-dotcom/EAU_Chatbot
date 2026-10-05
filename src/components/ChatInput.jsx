@@ -117,7 +117,7 @@ export default function ChatInput({
           <button
             type="button"
             onClick={onOpenLiveVoice}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1e60f2] hover:bg-[#1554dd] active:scale-95 transition-all flex items-center justify-center cursor-pointer shadow-sm flex-shrink-0"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-red-600 hover:bg-red-700 active:bg-red-800 active:scale-95 transition-all flex items-center justify-center cursor-pointer shadow-sm shadow-red-500/25 flex-shrink-0"
             title="Live Voice Mode"
           >
             <div className="flex items-center gap-[2px] sm:gap-[2.5px] justify-center h-4 sm:h-4.5">

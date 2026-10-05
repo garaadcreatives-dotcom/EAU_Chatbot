@@ -14,7 +14,7 @@ const KNOWLEDGE_FILE = path.join(process.cwd(), 'data', 'admin_knowledge.json');
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
 
   app.use(express.json({ limit: '50mb' }));
 
@@ -579,19 +579,25 @@ ${dynamicAdminData}
     return "Walaal bariga africa ayaanu nahay, ee jaamacadda wax iga waydii uun😊";
   }
 
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  // Static files or Vite middleware
+  const distPath = path.join(process.cwd(), "dist");
+  if (process.env.NODE_ENV === "production" && fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  } else if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
     });
+    app.use(vite.middlewares);
   }
 
   app.listen(PORT, "0.0.0.0", () => {

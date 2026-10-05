@@ -13,21 +13,21 @@ export default function Header({
   return (
     <header className={`${
       theme === 'dark' ? 'bg-[#000000] border-b border-[#212121]' : 'bg-gradient-to-r from-blue-700 to-indigo-600 shadow-md border-b border-white/10'
-    } text-white px-3.5 sm:px-6 py-3 sm:py-4 z-10 transition-colors`}>
-      <div className="max-w-4xl lg:max-w-5xl mx-auto flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
+    } text-white px-3 sm:px-5 py-2 sm:py-2.5 z-10 transition-colors`}>
+      <div className="max-w-3xl lg:max-w-4xl mx-auto flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={onOpenDrawer}
-            className={`p-2 sm:p-2.5 rounded-full transition-colors ${
+            className={`p-1.5 sm:p-2 rounded-full transition-colors ${
               theme === 'dark' ? 'text-slate-300 hover:bg-[#212121] hover:text-white' : 'text-blue-100 hover:bg-white/20 hover:text-white'
             } backdrop-blur-sm cursor-pointer flex-shrink-0`}
             title="Recent Chats"
           >
-            <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+            <Menu className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
           </button>
           <div 
             onClick={onLogoClick}
-            className={`w-10 h-10 sm:w-13 sm:h-13 md:w-14 md:h-14 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl shadow-md cursor-pointer hover:scale-105 transition-transform ${
+            className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-xl shadow-md cursor-pointer hover:scale-105 transition-transform ${
               theme === 'dark' ? 'bg-[#181818] border border-[#2f2f2f]' : 'bg-white shadow-md border border-white/20'
             }`}
             title="EAU Garowe Logo"
@@ -35,16 +35,16 @@ export default function Header({
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQflmfbmpLajicm82NGmm6dAcXd0ERTuoCdEFZe1MriM2NxGzKKzkne_so&s=10" alt="EAU Logo" className="w-full h-full object-cover scale-[1.35]" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-2xl md:text-[1.65rem] font-bold tracking-tight truncate leading-tight">EAU Garowe</h1>
-            <p className={`text-xs sm:text-sm font-semibold tracking-wider uppercase truncate ${theme === 'dark' ? 'text-slate-400' : 'text-blue-200'}`}>University</p>
+            <h1 className="text-base sm:text-xl font-bold tracking-tight truncate leading-tight">EAU Garowe</h1>
+            <p className={`text-[10px] sm:text-xs font-semibold tracking-wider uppercase truncate ${theme === 'dark' ? 'text-slate-400' : 'text-blue-200'}`}>University</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           {hasMessages && (
             <button
               onClick={onClearChat}
-              className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full transition-all text-xs sm:text-sm font-semibold shadow-sm border cursor-pointer active:scale-95 ${
+              className={`px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full transition-all text-xs font-semibold shadow-sm border cursor-pointer active:scale-95 ${
                 theme === 'dark' ? 'bg-[#1e1e1e] text-slate-200 border-[#333333] hover:bg-[#2a2a2a] hover:text-white' : 'bg-white text-blue-700 border-white/40 hover:bg-blue-50 hover:shadow-md'
               } backdrop-blur-sm`}
               title="New Chat"
@@ -55,12 +55,12 @@ export default function Header({
 
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className={`p-1.5 sm:p-2.5 rounded-full transition-colors cursor-pointer active:scale-95 ${
+            className={`p-1.5 sm:p-2 rounded-full transition-colors cursor-pointer active:scale-95 ${
               theme === 'dark' ? 'text-slate-300 hover:bg-[#212121]' : 'text-blue-100 hover:bg-white/20'
             }`}
             title="Toggle Theme"
           >
-            {theme === 'dark' ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
+            {theme === 'dark' ? <Sun className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : <Moon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />}
           </button>
         </div>
       </div>

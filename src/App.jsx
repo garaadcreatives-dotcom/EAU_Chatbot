@@ -947,9 +947,9 @@ export default function App() {
       <main 
         ref={chatContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-3.5 sm:px-6 md:px-8 py-3 sm:py-5 md:py-7 w-full max-w-4xl lg:max-w-5xl mx-auto"
+        className="flex-1 overflow-y-auto px-3 sm:px-5 md:px-6 py-2.5 sm:py-4 md:py-5 w-full max-w-3xl lg:max-w-4xl mx-auto"
       >
-        <div className="space-y-4 sm:space-y-7 pb-4 sm:pb-8">
+        <div className="space-y-3 sm:space-y-5 pb-3 sm:pb-6">
           <AnimatePresence initial={false}>
             {messages.map((message) => (
               <motion.div

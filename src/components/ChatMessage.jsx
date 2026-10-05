@@ -200,7 +200,7 @@ const renderFormattedMessage = (rawText, theme = 'light') => {
     if (/^\s*[-*•]\s+/.test(line)) {
       const itemText = line.replace(/^\s*[-*•]\s+/, '');
       blocks.push(
-        <div key={`li-${i}`} style={{ color: textColor }} className="flex items-start gap-2 sm:gap-2.5 my-1.5 sm:my-2 text-sm sm:text-[15px] md:text-base leading-relaxed">
+        <div key={`li-${i}`} style={{ color: textColor }} className="flex items-start gap-2.5 my-2 text-[0.98rem] sm:text-base md:text-[1.05rem] leading-[1.68]">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-2 flex-shrink-0" />
           <span>{formatInline(itemText)}</span>
         </div>
@@ -216,7 +216,7 @@ const renderFormattedMessage = (rawText, theme = 'light') => {
     }
 
     blocks.push(
-      <p key={`p-${i}`} style={{ color: textColor }} className="my-1.5 sm:my-2 text-sm sm:text-[15px] md:text-base leading-relaxed">
+      <p key={`p-${i}`} style={{ color: textColor }} className="my-2 text-[0.98rem] sm:text-base md:text-[1.05rem] leading-[1.68]">
         {formatInline(line)}
       </p>
     );
@@ -322,7 +322,7 @@ export default function ChatMessage({
           <div className="flex flex-col items-end max-w-full">
             {/* Soft Bubble */}
             <div
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl text-sm sm:text-[15px] md:text-base leading-relaxed break-words ${
+              className={`px-4.5 sm:px-5.5 py-2.5 sm:py-3 rounded-2xl md:rounded-[22px] text-[0.98rem] sm:text-base md:text-[1.05rem] leading-[1.68] break-words ${
                 theme === 'dark' ? 'bg-[#0284c7] text-white font-normal shadow-sm' : 'bg-[#f4f4f4] text-slate-900 font-normal shadow-sm'
               }`}
             >
@@ -365,7 +365,7 @@ export default function ChatMessage({
   // BOT MESSAGE (Clean Canvas Text)
   return (
     <div className="flex flex-col items-start max-w-full md:max-w-[95%] space-y-1 sm:space-y-2">
-      <div style={{ color: theme === 'dark' ? '#ffffff' : '#0f172a' }} className="text-sm sm:text-[15px] md:text-base leading-relaxed whitespace-pre-wrap py-1 sm:py-1.5 font-normal w-full break-words">
+      <div style={{ color: theme === 'dark' ? '#ffffff' : '#0f172a' }} className="text-[0.98rem] sm:text-base md:text-[1.05rem] leading-[1.68] whitespace-pre-wrap py-1 sm:py-2 font-normal w-full break-words">
         <TypewriterMessage text={message.content} isTyping={message.isTyping} theme={theme} />
       </div>
 

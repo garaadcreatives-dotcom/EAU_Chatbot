@@ -22,16 +22,16 @@ export default function ChatInput({
   showSuggestions
 }) {
   return (
-    <footer className="p-2 sm:p-3.5 md:p-4 w-full max-w-3xl lg:max-w-4xl mx-auto flex flex-col items-center">
+    <footer className="p-2.5 sm:p-4 md:p-5 w-full max-w-4xl lg:max-w-5xl mx-auto flex flex-col items-center">
       {/* Quick Prompt Suggestion Pills */}
       {showSuggestions && (
-        <div className="flex items-center gap-2 sm:gap-2.5 mb-2.5 sm:mb-3.5 w-full overflow-x-auto no-scrollbar pb-1 md:flex-wrap md:justify-center px-1">
+        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 w-full overflow-x-auto no-scrollbar pb-1 md:flex-wrap md:justify-center px-1">
           {suggestedQuestions.map((q, idx) => (
             <button
               key={idx}
               type="button"
               onClick={() => onSelectSuggestion(q)}
-              className={`flex-shrink-0 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all shadow-sm border cursor-pointer active:scale-95 whitespace-nowrap ${
+              className={`flex-shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-[0.92rem] font-medium transition-all shadow-sm border cursor-pointer active:scale-95 whitespace-nowrap ${
                 theme === 'dark'
                   ? 'bg-[#181818] border-[#2f2f2f] text-slate-200 hover:bg-[#252525] hover:text-white hover:border-slate-500'
                   : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-300'
@@ -69,7 +69,7 @@ export default function ChatInput({
       {/* Main Input Form */}
       <form 
         onSubmit={onSendMessage}
-        className={`w-full flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-1.5 md:py-2 rounded-full border shadow-sm md:shadow-md transition-all ${
+        className={`w-full flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-full border shadow-sm md:shadow-md transition-all ${
           theme === 'dark' 
             ? 'bg-[#141414] border-[#2c2c2c] focus-within:border-slate-500' 
             : 'bg-white border-slate-200 focus-within:border-blue-400 focus-within:shadow-lg'
@@ -86,21 +86,21 @@ export default function ChatInput({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-full cursor-pointer flex-shrink-0"
+          className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-full cursor-pointer flex-shrink-0"
           title="Attach file"
         >
-          <Paperclip className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+          <Paperclip className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
         </button>
 
         <button
           type="button"
           onClick={onToggleRecording}
-          className={`p-1.5 transition-colors rounded-full cursor-pointer flex-shrink-0 ${
+          className={`p-1.5 sm:p-2 transition-colors rounded-full cursor-pointer flex-shrink-0 ${
             isRecording ? 'text-red-500 animate-pulse bg-red-50 dark:bg-red-950/40' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
           }`}
           title="Voice input"
         >
-          <Mic className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+          <Mic className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
         </button>
 
         <input
@@ -109,7 +109,7 @@ export default function ChatInput({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={isRecording ? "Listening..." : "Ask EAU Garowe..."}
-          className="flex-1 bg-transparent py-1 sm:py-1.5 px-2 text-sm sm:text-base focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-white min-w-0"
+          className="flex-1 bg-transparent py-1 sm:py-2 px-2 text-base md:text-[1.05rem] focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-white min-w-0"
         />
 
         {/* ChatGPT Style Live Voice Launcher Button */}
@@ -117,14 +117,14 @@ export default function ChatInput({
           <button
             type="button"
             onClick={onOpenLiveVoice}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#1e60f2] hover:bg-[#1554dd] active:scale-95 transition-all flex items-center justify-center cursor-pointer shadow-sm flex-shrink-0"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1e60f2] hover:bg-[#1554dd] active:scale-95 transition-all flex items-center justify-center cursor-pointer shadow-sm flex-shrink-0"
             title="Live Voice Mode"
           >
-            <div className="flex items-center gap-[2px] sm:gap-[2.5px] justify-center h-3.5 sm:h-4">
+            <div className="flex items-center gap-[2px] sm:gap-[2.5px] justify-center h-4 sm:h-4.5">
+              <span className="w-[2px] sm:w-[2.5px] h-[8px] sm:h-[9px] bg-white rounded-full"></span>
+              <span className="w-[2px] sm:w-[2.5px] h-[13px] sm:h-[15px] bg-white rounded-full"></span>
+              <span className="w-[2px] sm:w-[2.5px] h-[10px] sm:h-[12px] bg-white rounded-full"></span>
               <span className="w-[2px] sm:w-[2.5px] h-[7px] sm:h-[8px] bg-white rounded-full"></span>
-              <span className="w-[2px] sm:w-[2.5px] h-[12px] sm:h-[14px] bg-white rounded-full"></span>
-              <span className="w-[2px] sm:w-[2.5px] h-[9px] sm:h-[11px] bg-white rounded-full"></span>
-              <span className="w-[2px] sm:w-[2.5px] h-[6px] sm:h-[7px] bg-white rounded-full"></span>
             </div>
           </button>
         )}
@@ -132,17 +132,17 @@ export default function ChatInput({
         <button
           type="submit"
           disabled={(!input.trim() && !attachment) || isLoading}
-          className={`p-2 sm:p-2.5 rounded-full transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm cursor-pointer flex-shrink-0 active:scale-95 ${
+          className={`p-2.5 sm:p-3 rounded-full transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm cursor-pointer flex-shrink-0 active:scale-95 ${
             theme === 'dark' 
               ? 'bg-white text-black hover:bg-slate-200' 
               : 'bg-slate-900 text-white hover:bg-slate-800'
           }`}
         >
-          {isLoading ? <Loader2 className="w-4 h-4 sm:w-4.5 sm:h-4.5 animate-spin" /> : <Send className="w-4 h-4 sm:w-4.5 sm:h-4.5" />}
+          {isLoading ? <Loader2 className="w-4.5 h-4.5 sm:w-5 sm:h-5 animate-spin" /> : <Send className="w-4.5 h-4.5 sm:w-5 sm:h-5" />}
         </button>
       </form>
 
-      <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 text-center mt-1.5 sm:mt-2 font-medium">
+      <p className="text-xs sm:text-[13px] text-slate-400 dark:text-slate-500 text-center mt-2 font-medium">
         Powered by East Africa University
       </p>
     </footer>

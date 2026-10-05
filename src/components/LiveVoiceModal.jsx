@@ -9,6 +9,8 @@ import {
   Globe
 } from 'lucide-react';
 
+import { cleanSomaliForSpeech, getOptimalSomaliVoice } from '../utils/somaliSpeech.js';
+
 /**
  * Fast Language Detector (Somali vs English)
  */
@@ -21,54 +23,8 @@ function detectLanguage(text) {
   return 'so-SO';
 }
 
-/**
- * Clean up text for natural spoken TTS with Somali phonetic smoothing
- */
 function cleanTextForSpeech(text, lang = 'so-SO') {
-  if (!text) return '';
-  let cleaned = text
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/https?:\/\/\S+/gi, ' ')
-    .replace(/\|/g, ' ')
-    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}]/gu, ' ')
-    .replace(/[#*_~`]/g, '')
-    .replace(/<\/?[^>]+(>|$)/g, ' ')
-    .replace(/\+/g, ' plus ')
-    .replace(/\$/g, ' doolar ')
-    .replace(/&/g, ' iyo ')
-    .replace(/%/g, ' boqolkiiba ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  // Natural phonetic expansions for conversational clarity
-  if (lang === 'so-SO') {
-    cleaned = cleaned
-      .replace(/\b1aad\b/gi, 'koowaad')
-      .replace(/\b2aad\b/gi, 'labaad')
-      .replace(/\b3aad\b/gi, 'saddexaad')
-      .replace(/\b4aad\b/gi, 'afarad')
-      .replace(/\bEAU\s*Garowe\b/gi, 'Jaamacadda Bariga Afrika Faraca Garowe')
-      .replace(/\bEAU\b/gi, 'Jaamacadda Bariga Afrika')
-      .replace(/\b2026[- ]?2027\b/g, 'laba kun lix iyo labaatan ilaa laba kun toddoba iyo labaatan')
-      .replace(/\b2026\b/g, 'laba kun iyo lix iyo labaatan')
-      .replace(/\b2027\b/g, 'laba kun iyo toddoba iyo labaatan')
-      .replace(/\b1999\b/g, 'sagaal iyo toban boqol iyo sagaashan iyo sagaal')
-      .replace(/\b2009\b/g, 'laba kun iyo sagaal')
-      .replace(/\bFinal[- ]?ka\b/gi, 'Faynaalka')
-      .replace(/\bMid[- ]?term[- ]?ka\b/gi, 'Mid-termka')
-      .replace(/\bSemester[- ]?ka\b/gi, 'Semestarka')
-      .replace(/\bSemester\b/gi, 'Semestar')
-      .replace(/\b(\d+)\s*USD\b/gi, '$1 doolar')
-      .replace(/\bSh\.\s*/gi, 'Sheekh ')
-      .replace(/\bDr\.\s*/gi, 'Dhaqtar ')
-      .replace(/\bProf\.\s*/gi, 'Borofasoor ')
-      .replace(/\bIT\b/gi, 'Ay-Tii')
-      .replace(/\bHRM\b/gi, 'Heych-Ar-Em')
-      .replace(/\bMBBS\b/gi, 'Kulliyadda Caafimaadka');
-  }
-
-  return cleaned;
+  return cleanSomaliForSpeech(text, lang);
 }
 
 export default function LiveVoiceModal({
@@ -352,31 +308,15 @@ export default function LiveVoiceModal({
     const utterance = new SpeechSynthesisUtterance(nextItem.text);
 
     const voices = synthRef.current.getVoices() || [];
-    let selectedVoice = null;
-
-    if (nextItem.lang === 'so-SO') {
-      selectedVoice = voices.find(v => v.lang.startsWith('so')) ||
-                      voices.find(v => v.name.includes('Natural') && (v.name.includes('Jenny') || v.name.includes('Ava') || v.name.includes('Aria') || v.name.includes('Guy') || v.name.includes('Andrew') || v.name.includes('Emma') || v.name.includes('Sonia') || v.lang.startsWith('it') || v.lang.startsWith('sw') || v.lang.startsWith('tr') || v.lang.startsWith('es'))) ||
-                      voices.find(v => v.name.includes('Natural')) ||
-                      voices.find(v => v.name.includes('Google') && (v.lang.startsWith('it') || v.lang.startsWith('es') || v.lang.startsWith('en'))) ||
-                      voices.find(v => v.lang.startsWith('it')) ||
-                      voices.find(v => v.lang.startsWith('sw')) ||
-                      voices.find(v => v.lang.startsWith('es')) ||
-                      voices.find(v => v.lang.startsWith('en')) ||
-                      voices[0];
-      utterance.rate = 1.15; // Fast, energetic, and snappy human pace (zero drag/lag)
-      utterance.pitch = 1.06; // Vibrant, confident, and smiling pitch
-    } else {
-      selectedVoice = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Natural') || v.name.includes('Jenny') || v.name.includes('Ava') || v.name.includes('Aria') || v.name.includes('Andrew') || v.name.includes('Google'))) ||
-                      voices.find(v => v.lang.startsWith('en')) ||
-                      voices[0];
-      utterance.rate = 1.16; // Fast, energetic, and upbeat pace
-      utterance.pitch = 1.05; // Lively, warm pitch
-    }
+    const selectedVoice = getOptimalSomaliVoice(voices, nextItem.lang);
 
     if (selectedVoice) {
       utterance.voice = selectedVoice;
+      utterance.lang = selectedVoice.lang;
     }
+
+    utterance.rate = nextItem.lang === 'so-SO' ? 1.08 : 1.12;
+    utterance.pitch = 1.02;
 
     utterance.onstart = () => {
       isSpeakingRef.current = true;

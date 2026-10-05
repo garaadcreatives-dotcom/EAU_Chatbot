@@ -9,6 +9,7 @@ import ChatInput from './components/ChatInput.jsx';
 import Drawer from './components/Drawer.jsx';
 import AdminModal from './components/AdminModal.jsx';
 import LiveVoiceModal from './components/LiveVoiceModal.jsx';
+import { cleanSomaliForSpeech, getOptimalSomaliVoice } from './utils/somaliSpeech.js';
 
 const SUGGESTED_QUESTIONS = [
   "Admission requirements",
@@ -569,27 +570,18 @@ export default function App() {
 
     window.speechSynthesis.cancel();
 
-    const cleanText = text
-      .replace(/\|/g, ' ')
-      .replace(/[*#`_~]/g, '')
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-      .replace(/https?:\/\/\S+/g, '')
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
-      .trim();
+    const cleanText = cleanSomaliForSpeech(text, 'so-SO');
+    if (!cleanText) return;
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.rate = 0.92;
-    utterance.pitch = 0.98;
+    utterance.rate = 1.05;
+    utterance.pitch = 1.0;
 
     const voices = window.speechSynthesis.getVoices();
-    const naturalVoice = voices.find(v => 
-      v.lang.toLowerCase().includes('so') || 
-      v.name.toLowerCase().includes('natural') || 
-      v.lang.toLowerCase().includes('ar') ||
-      v.name.toLowerCase().includes('google')
-    );
-    if (naturalVoice) {
-      utterance.voice = naturalVoice;
+    const optimalVoice = getOptimalSomaliVoice(voices, 'so-SO');
+    if (optimalVoice) {
+      utterance.voice = optimalVoice;
+      utterance.lang = optimalVoice.lang;
     }
 
     utterance.onend = () => setSpeakingId(null);
